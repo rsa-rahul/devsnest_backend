@@ -8,8 +8,3 @@ const UserSchema = new Schema({
 });
 
 module.exports = User = mongoose.model("User", UserSchema);
-© 2021 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
