@@ -1,4 +1,4 @@
-const { emailValidate, passwordValidate } = require("../utils/validate");
+const { emailValidate, passwordValidate } = require("../utils/validator");
 
 /**
  * level 1

@@ -3,12 +3,14 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-
 const { redisClient, RedisStore, session } = require("./database/redis");
-
-require("./database/mongo");
+// require("./database/mongo");
+var passport = require("passport");
 
 var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var passportRouter = require("./routes/passport");
+var streamRouter = require("./routes/stream");
 
 var app = express();
 
@@ -21,22 +23,29 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/stream", require("./routes/stream"));
+app.use("/stripe", require("./routes/stripe"));
 
 app.use(
   session({
     store: new RedisStore({ client: redisClient }),
-    secret: "sctr1232",
+    secret: "secret$1",
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: false,
       httpOnly: false,
-      maxAge: 1000 * 60 * 10,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     },
   })
 );
 
+app.use(passport.initialize());
+require("./middlewares/passport")(passport);
 app.use("/", indexRouter);
+app.use("/users", usersRouter);
+app.use("/passport", passportRouter);
+app.use("/products", require("./routes/products"));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

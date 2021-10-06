@@ -4,13 +4,19 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 
-const { redisClient, RedisStore, session } = require("./database/redis");
+// const { redisClient, RedisStore, session } = require("./database/redis");
 
-require("./database/mongo");
+// require("./database/mongo");
 
 var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var passportRouter = require("./routes/passport");
+var productsRouter = require("./routes/products");
+var streamRouter = require("./routes/stream");
+var stripeRouter = require("./routes/stripe");
 
 var app = express();
+const passport = require("passport");
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -22,21 +28,28 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(
-  session({
-    store: new RedisStore({ client: redisClient }),
-    secret: "sctr1232",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: false,
-      httpOnly: false,
-      maxAge: 1000 * 60 * 10,
-    },
-  })
-);
+// app.use(
+//   session({
+//     store: new RedisStore({ client: redisClient }),
+//     secret: "sctr1232",
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       secure: false,
+//       httpOnly: false,
+//       maxAge: 1000 * 60 * 10,
+//     },
+//   })
+// );
+app.use(passport.initialize());
+require("./middlewares/passport")(passport);
 
 app.use("/", indexRouter);
+app.use("/users", usersRouter);
+app.use("/passport", passportRouter);
+app.use("/products", productsRouter);
+app.use("/stream", streamRouter);
+app.use("/stripe", stripeRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
